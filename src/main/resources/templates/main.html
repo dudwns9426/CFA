@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Main Page</title>
+</head>
+<body>
+    <div>
+    	<span th:if="${userName != null}">
+    		안녕하세요! <span th:text="${userName}"></span> 님! <br>
+    		<a href="logout" role="button">로그아웃</a>
+    	</span>
+    	
+    	<span th:if="${userName == null}">
+    		<a href="/oauth2/authorization/google" role="button">구글 로그인</a>
+    	</span>
+    </div>
+    
+</body>
+</html>

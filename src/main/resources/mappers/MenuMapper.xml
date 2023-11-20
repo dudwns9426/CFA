@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mapper.MenuMapper">
+
+  <sql id="menuColumns">
+    no,
+    name,
+    en_name,
+    explanation,
+    search_count
+  </sql>
+
+  <!-- 메뉴 insert -->
+  <insert id="insertMenu" parameterType="MenuDTO">
+    INSERT INTO menu (
+      <include refid="menuColumns" />
+    ) VALUES (
+      null, -- Assuming no is auto-generated
+      #{name, jdbcType=VARCHAR},
+      #{enName, jdbcType=VARCHAR},
+      "delicious",
+      0
+    )
+  </insert>
+
+  <!-- 메뉴 디테일 select -->
+  <select id="selectMenuDetail" parameterType="String" resultType="MenuDTO">
+    SELECT
+    <include refid="menuColumns" />
+    FROM
+    menu
+    WHERE
+    en_name = #{enName}
+  </select>
+
+  <!-- 메뉴 update(searchCount) -->
+  <update id="updateMenu" parameterType="MenuDTO">
+    UPDATE
+    menu
+    SET
+    search_count = #{searchCount}
+    WHERE
+    en_name = #{enName}
+  </update>
+
+  <!-- 메뉴 delete -->
+  <delete id="deleteMenu" parameterType="String">
+    DELETE
+    FROM
+    menu
+    WHERE
+    en_name = #{enName}
+  </delete>
+
+  <!-- 메뉴 전체 리스트 select -->
+  <select id="selectMenuList" parameterType="MenuDTO" resultType="MenuDTO">
+    SELECT
+    name
+    FROM
+    menu
+  </select>
+
+  <!-- 메뉴 select 총 갯수 -->
+  <select id="selectMenuTotalCount" parameterType="MenuDTO" resultType="int">
+    SELECT
+    COUNT(*)
+    FROM
+    menu
+    WHERE
+    en_name = #{enName}
+  </select>
+
+  <!-- 메뉴 영어이름, 설명 리스트 select -->
+  <select id="selectMenuEnList" resultType="MenuDTO">
+    SELECT
+    en_name,
+    explanation
+    FROM
+    menu
+    WHERE
+    1=1
+    ORDER BY search_count DESC
+  </select>
+</mapper>

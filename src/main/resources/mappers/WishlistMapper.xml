@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.project.mapper.WishlistMapper">
+
+	<sql id="wishlistColumns">
+		user_id,
+		menu_id
+	</sql>
+
+	<!-- 위시리스트 insert -->
+	<insert id="insertWishlist" parameterType="WishlistDTO">
+		INSERT INTO wishlist (
+		<include refid="wishlistColumns" />
+		) VALUES (
+		#{userId},
+		#{menuId}
+		)
+	</insert>
+
+	<!-- 위시리스트 delete -->
+	<delete id="deleteWishlist" parameterType="WishlistDTO">
+		delete
+		FROM
+		wishlist
+		WHERE
+		user_id = #{userId}
+		and
+		menu_id = #{menuId}
+	</delete>
+
+	<!-- 위시리스트 체크 select -->
+	<select id="checkWishlist" parameterType="WishlistDTO"
+		resultType="int">
+		SELECT
+		count(*)
+		FROM
+		wishlist
+		where
+		user_id = #{userId}
+		and
+		menu_id = #{menuId}
+	</select>
+
+	<!-- 찜목록 총 갯수 -->
+	<select id="selectWishlistTotalCount" parameterType="Long"
+		resultType="int">
+		SELECT
+		COUNT(*)
+		FROM
+		wishlist
+		WHERE
+		menu_id = #{menuId}
+	</select>
+	
+	<!-- 찜목록 페이지에서 select -->
+	<select id="selectWishlist" parameterType="String"
+		resultType="MenuDTO">
+		SELECT m.en_name,
+			   m.EXPLANATION
+		FROM user u
+		JOIN wishlist w ON u.user_id = w.user_id
+		JOIN menu m ON w.menu_id = m.no
+		WHERE u.email = #{email}
+		ORDER BY m.search_count DESC;
+	</select>
+
+</mapper>
