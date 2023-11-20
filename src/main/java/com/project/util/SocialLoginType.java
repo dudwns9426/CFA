@@ -1,5 +1,5 @@
-package com.project.util;
-
-public enum SocialLoginType {
-	GOOGLE
-}
+//package com.project.util;
+//
+//public enum SocialLoginType {
+//	GOOGLE
+//}

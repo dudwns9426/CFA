@@ -3,17 +3,17 @@
 <mapper namespace="com.project.mapper.ReviewMapper">
   
   <sql id="reviewColumns">
-    idx,
+    review_id,
     writer,
     content,
     delete_yn,
     date_w,
-    food_idx
+    menu_id
   </sql>
   
-  <select id="findIdx" resultType="long" parameterType="String">
+  <select id="findReviewId" resultType="long" parameterType="String">
     SELECT
-    no
+    menu_id
     FROM
     menu
     WHERE
@@ -30,7 +30,7 @@
       #{content, jdbcType=VARCHAR},
       'n',
       CURRENT_TIMESTAMP,
-      #{foodIdx}
+      #{menuId}
     )
   </insert>
 
@@ -41,7 +41,7 @@
     SET
     delete_yn = "y"
     WHERE
-    idx = #{idx}
+    review_id = #{reviewId}
   </delete>
   
   <!-- 리뷰 리스트 select -->
@@ -51,7 +51,7 @@
     FROM
     review
     WHERE
-    food_idx = #{foodIdx}
+    menu_id = #{menuId}
   </select>
   
   <!-- 리뷰 리스트 select -->
@@ -61,9 +61,9 @@
     FROM
     review 
     WHERE
-    food_idx = #{foodIdx}
+    menu_id = #{menuId}
     ORDER BY
-    idx DESC
+    review_id DESC
     LIMIT 5
   </select>
   

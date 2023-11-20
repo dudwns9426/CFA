@@ -7,7 +7,7 @@ import com.project.domain.dto.ReviewDTO;
 
 public interface ReviewService {
 	
-	public long findIdx(String name);
+	public long findMenuId(String name);
 	
 	public boolean insertReview(IntReviewDTO intReviewDTO);
 	

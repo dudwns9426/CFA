@@ -33,7 +33,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.5'
-	implementation group: 'org.postgresql', name: 'postgresql', version: '42.3.7'
+	//implementation group: 'org.postgresql', name: 'postgresql', version: '42.3.7'
 	
 	runtimeOnly group: 'mysql', name: 'mysql-connector-java', version: '8.0.29' // MySQL JDBC
 	
@@ -54,7 +54,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.session:spring-session-data-redis'
 	//jwt token
-	implementation 'io.jsonwebtoken:jjwt:0.9.1'
+	//implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	//다이얼로그 플로우
 	implementation 'com.google.cloud:google-cloud-dialogflow:4.34.0'
 	

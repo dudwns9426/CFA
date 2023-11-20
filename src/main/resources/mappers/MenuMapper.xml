@@ -3,7 +3,7 @@
 <mapper namespace="com.project.mapper.MenuMapper">
 
   <sql id="menuColumns">
-    no,
+    menu_id,
     name,
     en_name,
     explanation,
@@ -15,7 +15,7 @@
     INSERT INTO menu (
       <include refid="menuColumns" />
     ) VALUES (
-      null, -- Assuming no is auto-generated
+      null, <!-- Assuming no is auto-generated-->
       #{name, jdbcType=VARCHAR},
       #{enName, jdbcType=VARCHAR},
       "delicious",

@@ -10,13 +10,13 @@ import com.project.domain.dto.ReviewDTO;
 @Mapper
 public interface ReviewMapper {
 	
-	public long findIdx(String foodName);
+	public long findReviewId(String foodName);
 	
-	public long deleteReview(long idx);
+	public long deleteReview(long reviewId);
 	  
-	public List<ReviewDTO> selectReviewList(long foodIdx);
+	public List<ReviewDTO> selectReviewList(long menuId);
 	
-	public List<ReviewDTO> selectSampleList(long foodIdx);
+	public List<ReviewDTO> selectSampleList(long menuId);
 
 	public long insertReview(IntReviewDTO intReviewDTO);
 }

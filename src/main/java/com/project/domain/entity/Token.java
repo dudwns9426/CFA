@@ -15,7 +15,7 @@ import lombok.Data;
 public class Token extends BaseTimeEntity {
 
 	@Id
-	@Column(length = 255)
+	@Column(length = 100)
 	private String refreshToken;
 
 	@Column(name = "expiration_time")
@@ -25,7 +25,7 @@ public class Token extends BaseTimeEntity {
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	@Column(name = "session_id")
+	@Column(name = "session_id", length = 50)
 	private String sessionId;
 
 	public Token() {

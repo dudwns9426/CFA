@@ -15,8 +15,8 @@ public class ReviewServiceImpl implements ReviewService{
 	
 	private final ReviewMapper reviewMapper;
 	
-	public long findIdx(String foodName) {
-		return reviewMapper.findIdx(foodName);
+	public long findMenuId(String foodName) {
+		return reviewMapper.findReviewId(foodName);
 	}
 	
 	public boolean insertReview(IntReviewDTO review) {

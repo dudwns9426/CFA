@@ -20,10 +20,10 @@ public class User extends BaseTimeEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long user_id;
 
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false, unique = true, length = 50)
 	private String email;
 
-	@Column
+	@Column(length = 10)
 	private String locale;
 
 	@OneToOne(mappedBy = "user")
