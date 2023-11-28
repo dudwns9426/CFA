@@ -23,7 +23,7 @@ import org.springframework.session.data.redis.config.ConfigureRedisAction;
 import com.project.service.TokenService;
 import com.project.service.UserService;
 //import com.project.repository.CustomSecurityContextRepository;
-import com.project.util.MyFilter;
+import com.project.util.TokenFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -55,7 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .antMatchers("/**").permitAll()
             
             .and()
-            .addFilterBefore(new MyFilter(redisTemplate, userService, tokenService), SecurityContextPersistenceFilter.class);
+            .addFilterBefore(new TokenFilter(redisTemplate, userService, tokenService), SecurityContextPersistenceFilter.class);
     
        		
 //        	.csrf().disable()

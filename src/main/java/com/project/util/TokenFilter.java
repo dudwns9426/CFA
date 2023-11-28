@@ -19,18 +19,34 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class MyFilter extends OncePerRequestFilter {
+/**
+ * 사용자의 요청을 필터링하여 액세스 토큰 및 세션 ID를 처리하는 필터 클래스입니다.
+ * 주로 Redis를 통해 토큰을 관리하고, 액세스 토큰을 검증하여 사용자의 요청을 처리합니다.
+ * 
+ * @author Jeon Youngjun
+ */
+public class TokenFilter extends OncePerRequestFilter {
 
     private final StringRedisTemplate redisTemplate;
     private final UserService userService;
     private final TokenService tokenService;
 
-    public MyFilter(StringRedisTemplate redisTemplate, UserService userService, TokenService tokenService) {
+    /**
+     * TokenFilter의 생성자입니다.
+     * 
+     * @param redisTemplate Redis를 사용하기 위한 StringRedisTemplate
+     * @param userService 사용자 정보를 처리하는 UserService
+     * @param tokenService 토큰 관리를 담당하는 TokenService
+     */
+    public TokenFilter(StringRedisTemplate redisTemplate, UserService userService, TokenService tokenService) {
         this.redisTemplate = redisTemplate;
         this.userService = userService;
         this.tokenService = tokenService;
     }
 
+    /**
+     * 실제 필터링 작업을 수행하는 메서드입니다.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         // 세션 ID 및 액세스 토큰 추출
@@ -47,7 +63,15 @@ public class MyFilter extends OncePerRequestFilter {
         }
     }
 
-    // 액세스 토큰 처리 로직
+    /**
+     * 액세스 토큰이 유효한 경우 처리 로직을 수행합니다.
+     * 
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @param chain FilterChain
+     * @param sessionId 세션 ID
+     * @param accessToken 액세스 토큰
+     */
     private void processValidAccessToken(HttpServletRequest request, HttpServletResponse response, 
     									FilterChain chain, String sessionId, String accessToken) throws IOException, ServletException {
         // Redis에서 액세스 토큰 정보 가져오기
@@ -69,7 +93,14 @@ public class MyFilter extends OncePerRequestFilter {
         }
     }
 
-    // 커스텀 인증 설정 및 필터 체이닝 계속
+    /**
+     * 커스텀 인증 설정 및 필터 체이닝을 계속합니다.
+     * 
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @param chain FilterChain
+     * @param sessionId 세션 ID
+     */
     private void setCustomAuthenticationAndContinueFiltering(HttpServletRequest request, HttpServletResponse response, 
     														FilterChain chain, String sessionId) 
     														throws IOException, ServletException {
@@ -86,7 +117,14 @@ public class MyFilter extends OncePerRequestFilter {
         }
     }
 
-    // 성공적인 응답 처리
+    /**
+     * 성공적인 응답을 처리합니다.
+     * 
+     * @param sessionId 세션 ID
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @param responseWrapper ContentCachingResponseWrapper
+     */
     private void handleSuccessfulResponse(String sessionId, HttpServletRequest request, 
     									  HttpServletResponse response, ContentCachingResponseWrapper responseWrapper) 
     									  throws IOException {
@@ -104,7 +142,15 @@ public class MyFilter extends OncePerRequestFilter {
         }
     }
 
-    // 액세스 토큰 재발급 로직 처리
+    /**
+     * 액세스 토큰을 재발급하는 로직을 처리합니다.
+     * 
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @param responseWrapper ContentCachingResponseWrapper
+     * @param refreshAccessTokenInfo 액세스 토큰 재발급 정보
+     * @param sessionId 세션 ID
+     */
     private void handleRefreshAccessToken(HttpServletRequest request, HttpServletResponse response, 
     									  ContentCachingResponseWrapper responseWrapper, 
     									  ResponseEntity<String> refreshAccessTokenInfo, String sessionId) throws IOException {
@@ -122,7 +168,14 @@ public class MyFilter extends OncePerRequestFilter {
         responseWrapper.copyBodyToResponse();
     }
 
-    // 액세스 토큰 또는 세션 ID가 null일 때 처리
+    /**
+     * 액세스 토큰 또는 세션 ID가 null인 경우의 처리 로직입니다.
+     * 
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @param chain FilterChain
+     * @param sessionId 세션 ID
+     */
     private void handleNullAccessTokenOrSessionId(HttpServletRequest request, HttpServletResponse response, 
     											 FilterChain chain, String sessionId) throws IOException {
        

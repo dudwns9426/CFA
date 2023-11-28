@@ -10,6 +10,12 @@ import com.project.mapper.MenuMapper;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 메뉴 정보를 처리하는 서비스 클래스입니다.
+ * 주로 메뉴 정보의 삽입, 업데이트, 삭제, 상세 조회 등의 기능을 제공합니다.
+ * 
+ * @author Jeon Youngjun
+ */
 @RequiredArgsConstructor
 @Service
 public class MenuServiceImpl implements MenuService {
@@ -17,7 +23,12 @@ public class MenuServiceImpl implements MenuService {
     private final MenuMapper menuMapper;
     
     
-    
+    /**
+     * 메뉴를 추가합니다.
+     * 
+     * @param params 추가할 메뉴 정보를 담은 DTO
+     * @return 작업 성공 여부를 반환합니다.
+     */
     @Transactional //insert
     public boolean insertMenu(MenuDTO params) {
         try {
@@ -41,7 +52,13 @@ public class MenuServiceImpl implements MenuService {
         return false; // 작업 실패 시 false 반환
     }
 
-    @Transactional // (searchCount +1) update
+    /**
+     * 메뉴의 검색 횟수를 1 증가시키고 업데이트합니다.
+     * 
+     * @param params 업데이트할 메뉴 정보를 담은 DTO
+     * @return 작업 성공 여부를 반환합니다.
+     */
+    @Transactional 
     public boolean updateMenu(MenuDTO params) {
         try {
             int selectCount = menuMapper.selectMenuTotalCount(params);
@@ -67,12 +84,22 @@ public class MenuServiceImpl implements MenuService {
         return false; // 작업 실패 시 false 반환
     }
 
-    
+    /**
+     * 메뉴의 상세 정보를 조회합니다.
+     * 
+     * @param name 조회할 메뉴의 한글 이름
+     * @return 조회된 메뉴의 상세 정보
+     */
     public MenuDTO getMenuDetail(String name) {
         return menuMapper.selectMenuDetail(name);
     }
     
-    //삭제
+    /**
+     * 메뉴를 삭제합니다.
+     * 
+     * @param name 삭제할 메뉴의 한글 이름
+     * @return 작업 성공 여부를 반환합니다.
+     */
     public boolean deleteMenu(String name) {
         int queryResult = 0;
         MenuDTO menu = menuMapper.selectMenuDetail(name);
@@ -84,7 +111,12 @@ public class MenuServiceImpl implements MenuService {
         return (queryResult == 1)? true : false;
     }
     
-    //한글 리스트 받기(랜덤 뽑기 용)
+    /**
+     * 모든 메뉴의 한글 이름을 반환합니다.(랜덤 뽑기 사용)
+     * 
+     * @param params 메뉴 정보를 담은 DTO
+     * @return 모든 메뉴의 한글 이름이 담긴 리스트
+     */
     public List<MenuDTO> getMenuNameList(MenuDTO params) {
         List<MenuDTO> menuNameList = Collections.emptyList();
                 
@@ -93,7 +125,12 @@ public class MenuServiceImpl implements MenuService {
         return menuNameList;
     }
     
-    // 영어이름 리스트 받기(사이드바 카테고리 리스트용)
+    /**
+     * 모든 메뉴의 영어 이름을 반환합니다.(메뉴 사전 사용)
+     * 
+     * @param params 메뉴 정보를 담은 DTO
+     * @return 모든 메뉴의 영어 이름이 담긴 리스트
+     */
 	public List<MenuDTO> getMenuEnNameList(MenuDTO params) {
 		List<MenuDTO> menuEnNameList = Collections.emptyList();
 

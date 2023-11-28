@@ -28,6 +28,12 @@ import com.project.util.ExceptionUtil;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 찜목록을 처리하는 컨트롤러 클래스입니다.
+ * 사용자의 찜목록에 메뉴를 추가하거나 삭제하는 기능을 제공합니다.
+ * 
+ * @author Jeon Youngjun)
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/wishlist")
@@ -37,6 +43,12 @@ public class WishlistController {
 	private final UserService userService;
 	private final MenuService menuService;
 
+    /**
+     * 찜목록에 메뉴를 추가하거나 삭제하는 요청을 처리합니다.
+     * 
+     * @param params 찜목록 요청 파라미터를 담은 객체
+     * @return 찜목록에 대한 응답으로 찜 갯수와 추가 또는 삭제 여부를 반환합니다.
+     */
 	@PostMapping
 	public ResponseEntity<WishlistCountDTO> insertDeleteWishlist(@RequestBody WishlistRequest params) {
 		try {
@@ -81,6 +93,12 @@ public class WishlistController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 	}
 	
+    /**
+     * 찜목록의 메뉴 갯수와 추가 여부를 반환합니다.
+     * 
+     * @param params 찜목록 요청 파라미터를 담은 객체
+     * @return 해당 메뉴에 대한 응답으로 전체 사용자의 찜한 갯수와 현재 사용자의 추가 여부를 반환합니다.
+     */
 	@PostMapping("/oncreate")
 	public ResponseEntity<WishlistCountDTO> getWishlistCount(@RequestBody WishlistRequest params) {
 		try {
@@ -123,6 +141,12 @@ public class WishlistController {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 	}
 
+    /**
+     * 사용자의 위시리스트에 등록된 메뉴 정보를 반환합니다.
+     * 
+     * @param email 사용자 이메일
+     * @return 위시리스트에 등록된 메뉴 영어 이름과 설명을 반환합니다.
+     */
 	@GetMapping
 	public ResponseEntity<Map<String, List<String>>> getWishlist(@RequestHeader("email") String email) {
 		if (email == null) {

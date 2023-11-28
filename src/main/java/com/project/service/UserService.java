@@ -33,26 +33,44 @@ import com.project.util.ConfigUtils;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 사용자 서비스 클래스입니다. Google 로그인 및 사용자 정보 처리를 담당합니다.
+ *
+ * 주로 Google OAuth2를 사용하여 로그인한 사용자의 정보를 처리하고, Redis를 통해 액세스토큰을 관리합니다.
+ *
+ * @author Jeon Youngjun
+ */
 @RequiredArgsConstructor
 @Service
 public class UserService {
 	private final UserRepository userRepository;
 	private final ConfigUtils configUtils;
-//	private final CustomSecurityContextRepository securityContextRepository;
 	
 	@Autowired
 	private StringRedisTemplate redisTemplate;
 
-	// 인가코드를 받아 구글로그인에 request할 params를 만듬
+    /**
+     * 인가코드를 받아 구글 로그인 토큰 요청에 필요한 requestParams를 생성합니다.
+     *
+     * @param authCode 구글에서 받은 인가코드
+     * @return GoogleLoginRequest 객체
+     */
 	public GoogleLoginRequest makeRequest(String authCode) {
-		GoogleLoginRequest requestParams = GoogleLoginRequest.builder().clientId(configUtils.getGoogleClientId())
+		GoogleLoginRequest requestParams = GoogleLoginRequest.builder()
+				.clientId(configUtils.getGoogleClientId())
 				.clientSecret(configUtils.getGoogleSecret()).code(authCode)
-				.redirectUri(configUtils.getGoogleRedirectUri()).grantType("authorization_code").build();
+				.redirectUri(configUtils.getGoogleRedirectUri())
+				.grantType("authorization_code")
+				.build();
 		return requestParams;
 	}
 
-	// 구글api에 requestParams로 요청하여 api로부터 Json형태로 response를 받음
-	// RestTemplate 사용해서 요청
+    /**
+     * Google API에 requestParams를 사용하여 요청하고, JSON 형태로 응답을 받습니다.
+     *
+     * @param requestParams Google 로그인 요청 파라미터
+     * @return JSON 형태의 응답
+     */
 	public ResponseEntity<String> apiResponseJson(GoogleLoginRequest requestParams) {
 		RestTemplate restTemplate = new RestTemplate();
 		HttpHeaders headers = new HttpHeaders();
@@ -63,7 +81,14 @@ public class UserService {
 		return apiResponseJson;
 	}
 
-	// Json 형태의 response를 자바 객체로 변환
+    /**
+     * JSON 형태의 응답을 TokenResponse 객체로 변환합니다.
+     *
+     * @param apiResponseJson JSON 형태의 응답
+     * @return TokenResponse 객체
+     * @throws JsonMappingException JSON 매핑 예외
+     * @throws JsonProcessingException JSON 처리 예외
+     */
 	public TokenResponse googleLoginResponse(ResponseEntity<String> apiResponseJson)
 			throws JsonMappingException, JsonProcessingException {
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -77,7 +102,12 @@ public class UserService {
 		return googleLoginResponse;
 	}
 
-	// RestTemplate사용해서 IdToken으로 사용자 정보 받아옴
+	/**
+     * RestTemplate을 사용하여 IdToken으로 사용자 정보를 받아옵니다.
+     *
+     * @param googleLoginResponse Google 로그인 응답 정보
+     * @return JSON 형태의 결과
+     */
 	public String resultJson(TokenResponse googleLoginResponse) {
 		RestTemplate restTemplate = new RestTemplate();
 		String idToken = googleLoginResponse.getIdToken();
@@ -90,6 +120,14 @@ public class UserService {
 		return resultJson;
 	}
 
+    /**
+     * 리프레시 토큰이 포함된 로그인 시 응답할 FirstLoginResponse 객체를 생성합니다.
+     *
+     * @param idTokenDTO       IdTokenDTO 객체
+     * @param tokenResponse    Google 로그인 응답 정보
+     * @param sessionId         세션 ID
+     * @return FirstLoginResponse 객체
+     */
 	public FirstLoginResponse firstLoginResponse(IdTokenDTO idTokenDTO, TokenResponse tokenResponse,String sessionId) {
 		String email = idTokenDTO.getEmail();
 		String picture = idTokenDTO.getPicture();
@@ -101,6 +139,14 @@ public class UserService {
 		return firstLoginResponse;
 	}
 
+    /**
+     * 리프레시 토큰이 포함되지 않은 로그인 시 응답할 LoginResponse 객체를 생성합니다.
+     *
+     * @param idTokenDTO    IdTokenDTO 객체
+     * @param tokenResponse Google 로그인 응답 정보
+     * @param sessionId     세션 ID
+     * @return LoginResponse 객체
+     */
 	public LoginResponse loginResponse(IdTokenDTO idTokenDTO, TokenResponse tokenResponse, String sessionId) {
 		String email = idTokenDTO.getEmail();
 		String picture = idTokenDTO.getPicture();
@@ -111,11 +157,22 @@ public class UserService {
 		return loginResponse;
 	}
 
+    /**
+     * 이메일로 사용자가 존재하는지 확인합니다.
+     *
+     * @param email 사용자 이메일
+     * @return 사용자 존재 여부
+     */
 	public boolean existsByEmail(String email) {
 		return userRepository.existsByEmail(email);
 	}
 
-	
+    /**
+     * IdTokenDTO 정보를 사용하여 DB에 사용자를 갱신합니다.
+     *
+     * @param idTokenDTO IdTokenDTO 객체
+     * @return 생성된 사용자
+     */
 	public User createUser(IdTokenDTO idTokenDTO) {
 	    String email = idTokenDTO.getEmail();
 	    String locale = idTokenDTO.getLocale();
@@ -125,10 +182,23 @@ public class UserService {
 	    return userRepository.save(newUser);
 	}
 
+    /**
+     * 이메일로 사용자를 찾습니다.
+     *
+     * @param email 사용자 이메일
+     * @return 사용자 객체
+     */
 	public User findByEmail(String email) {
 		return userRepository.findByEmail(email);
 	}
 
+    /**
+     * Redis에 액세스 토큰 정보를 저장합니다.
+     *
+     * @param accessToken 액세스 토큰
+     * @param expiresIn   토큰 유효 기간 (1시간)
+     * @param sessionId   세션 ID
+     */
 	public void setRedis(String accessToken, long expiresIn, String sessionId) {
 	    AccessTokenInfo accessTokenInfo = new AccessTokenInfo(accessToken);
 	    
@@ -139,6 +209,12 @@ public class UserService {
 	    redisTemplate.expire(sessionId, expiresIn, TimeUnit.SECONDS);
 	}
 	
+    /**
+     * Redis에서 세션 정보를 삭제합니다.
+     *
+     * @param sessionId 세션 ID
+     * @author Kim Taewon
+     */
 	public void deleteRedis(String sessionId) {
 	    if (redisTemplate.hasKey(sessionId)) {
 	        redisTemplate.delete(sessionId);
@@ -148,7 +224,12 @@ public class UserService {
 	    }
 	}
 
-	
+    /**
+     * 액세스 토큰 정보를 JSON 형태로 변환합니다.
+     *
+     * @param accessTokenInfo 액세스 토큰 정보 객체
+     * @return JSON 형태의 액세스 토큰 정보
+     */
 	private String convertAccessTokenInfoToJson(AccessTokenInfo accessTokenInfo) {
 	    ObjectMapper objectMapper = new ObjectMapper();
 	    try {
@@ -161,8 +242,12 @@ public class UserService {
 	}
 	
 
-	// 요청 헤더에서 값 추출
-	// 액세스 토큰 추출
+    /**
+     * 요청 헤더에서 액세스 토큰을 추출합니다.
+     *
+     * @param request HTTP 요청 객체
+     * @return 추출된 액세스 토큰
+     */
 	public String extractAccessToken(HttpServletRequest request) {
 		
 		String accessToken = request.getHeader("Authorization");
@@ -171,14 +256,18 @@ public class UserService {
 			accessToken = accessToken.substring(7);
 			return accessToken;
 		} else {
-			// 유효한 액세스 토큰이 없을 경우 예외 처리
-//			throw new ExceptionUtil("No valid access token provided.");
+			// 유효한 액세스 토큰이 없을 경우 재로그인 요구
 			return null;
 		}
 	}
 	
 	
-	//refreshToken추출
+    /**
+     * 요청 헤더에서 Refresh 토큰을 추출합니다.
+     *
+     * @param request HTTP 요청 객체
+     * @return 추출된 Refresh 토큰
+     */
 	public String extractRefreshToken(HttpServletRequest request) {
 		String refreshToken = request.getHeader("RefreshToken");
 		if(refreshToken != null) {
@@ -188,17 +277,35 @@ public class UserService {
 		}
 	}
 	
+    /**
+     * 요청 헤더에서 세션 ID를 추출합니다.
+     *
+     * @param request HTTP 요청 객체
+     * @return 추출된 세션 ID
+     */
 	public String extractSessionId(HttpServletRequest request) {
         // "Session-Id" 헤더에서 세션 아이디 추출
         String sessionId = request.getHeader("Session-Id");
         return sessionId;
     }
     
+    /**
+     * Redis에서 세션 정보로부터 AccessTokenInfo 객체를 가져옵니다.
+     *
+     * @param sessionId 세션 ID
+     * @return AccessTokenInfo 객체
+     */
     public AccessTokenInfo getAccessTokenInfoFromRedis(String sessionId) {
         String accessTokenInfoJson = redisTemplate.opsForValue().get(sessionId);
         return convertJsonToAccessTokenInfo(accessTokenInfoJson);
     }
 
+    /**
+     * JSON 형태의 문자열을 AccessTokenInfo 객체로 변환합니다.
+     *
+     * @param accessTokenInfoJson JSON 형태의 문자열
+     * @return AccessTokenInfo 객체
+     */
     public AccessTokenInfo convertJsonToAccessTokenInfo(String accessTokenInfoJson) {
         if (accessTokenInfoJson == null) {
             return null;

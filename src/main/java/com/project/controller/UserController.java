@@ -29,6 +29,12 @@ import com.project.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 사용자 관련 기능을 처리하는 컨트롤러 클래스입니다.
+ * 이 클래스는 Google 로그인, 로그아웃과 관련된 엔드포인트를 제공합니다.
+ * @author Jeon Youngjun(로그인) , Kim Taewon(로그아웃)
+ */
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/google")
@@ -37,10 +43,8 @@ public class UserController {
 	@Autowired
 	private TokenRepository tokenRepository;
 
-//    private final ConfigUtils configUtils;
 	private final UserService userService;
 	private final TokenService tokenService;
-//    private final CustomSecurityContextRepository securityContextRepository;
 
 //    @PostMapping(value = "/login")
 //    public ResponseEntity<Object> moveGoogleInitUrl() {
@@ -57,7 +61,15 @@ public class UserController {
 //
 //        return ResponseEntity.badRequest().build();
 //    }
-
+	
+    /**
+     * Google 로그인을 처리하는 엔드포인트입니다.
+     *
+     * @param authCode             Google 인가 코드
+     * @param httpServletRequest   HttpServletRequest 객체
+     * @return ResponseEntity<?> - 로그인 결과에 따른 응답(리프레시 토큰 유무)
+     * @author Jeon Youngjun
+     */
 	@PostMapping(value = "/login/redirect")
 	public ResponseEntity<?> redirectGoogleLogin(@RequestParam(value = "code") String authCode,
 			HttpServletRequest httpServletRequest) {
@@ -69,29 +81,27 @@ public class UserController {
 
 		try {
 			ResponseEntity<String> apiResponseJson = userService.apiResponseJson(requestParams);
-			System.out.println("apiResponseJson:" + apiResponseJson);
 
 			TokenResponse googleLoginResponse = userService.googleLoginResponse(apiResponseJson);
-			System.out.println("TokenResponse:" + googleLoginResponse);
 
 			String resultJson = userService.resultJson(googleLoginResponse);
-			System.out.println("resultJson:" + resultJson);
+			
 			if (resultJson != null) {
 				ObjectMapper objectMapper = new ObjectMapper();
 				IdTokenDTO idTokenDTO = objectMapper.readValue(resultJson, new TypeReference<IdTokenDTO>() {
 				});
-				System.out.println("idTokenDTO:" + idTokenDTO);
 
 				String accessToken = googleLoginResponse.getAccessToken();
 				long expiresIn = Long.parseLong(googleLoginResponse.getExpiresIn());
 				String sessionId = httpServletRequest.getSession().getId();
-				// SecurityContextHolder에 email, accessToken저장
+				// Redis에 sessionId(key), accessToken(value)저장
 				userService.setRedis(accessToken, expiresIn, sessionId);
 
 				// 이메일 존재 여부
 				boolean exists = userService.existsByEmail(idTokenDTO.getEmail());
-				// email 존재 시
+				
 				if (exists) {
+					// email 존재 시
 					Long userId = userService.findByEmail(idTokenDTO.getEmail()).getUser_id();
 					// email존재하지만 refreshToken값이 들어올 경우
 					if (googleLoginResponse.getRefreshToken() != null) {
@@ -102,12 +112,12 @@ public class UserController {
 
 						// refreshToken이 포함된 DTO로 전달
 						return ResponseEntity.ok().body(firstLoginResponse);
-					} else { // email존재, refreshToken값이 들어오지 않을때
-						// sessionId 업데이트s
+					} else { 
+						// email존재, refreshToken값이 들어오지 않을때
+						// sessionId 업데이트
 						tokenService.updateSessionId(userId, sessionId);
 						LoginResponse loginResponse = userService.loginResponse(idTokenDTO, googleLoginResponse,
 								sessionId);
-						System.out.println("123==" + ResponseEntity.ok().body(loginResponse));
 						// refreshToken이 없는 DTO로 전달
 						return ResponseEntity.ok().body(loginResponse);
 					}
@@ -119,8 +129,6 @@ public class UserController {
 					tokenService.saveToken(newUser.getUser_id(), googleLoginResponse, sessionId);
 					FirstLoginResponse firstLoginResponse = userService.firstLoginResponse(idTokenDTO,
 							googleLoginResponse, sessionId);
-
-					System.out.println("123==" + ResponseEntity.ok().body(firstLoginResponse));
 					// refreshToken이 포함된 DTO로 전달
 					return ResponseEntity.ok().body(firstLoginResponse);
 				}
@@ -135,15 +143,19 @@ public class UserController {
 		return ResponseEntity.badRequest().body(null);
 	}
 
+	/**
+     * 사용자 로그아웃을 처리하는 엔드포인트입니다.
+     *
+     * @param sessionId 세션 ID (Request Header: Session-Id)
+     * @return ResponseEntity<Void> - 로그아웃 결과에 따른 응답
+     * @author Kim Taewon
+     */
 	@PostMapping("/logout")
 	public ResponseEntity<Void> logout(@RequestHeader("Session-Id") String sessionId) {
 	    try {
-	        System.out.println("sessionid : " + sessionId);
 	        Token token = tokenRepository.findBySessionId(sessionId);
-	        System.out.println("token : " + token);
 	        if (token != null) {
 	            Long userId = token.getUser().getUser_id();
-	            System.out.println("userId : " + userId);
 	            // 사용자의 sessionId를 NULL로 설정하고 modifiedDate를 업데이트합니다.
 	            tokenRepository.deleteSessionId(userId, Instant.now());
 	            System.out.println("DBdelete");

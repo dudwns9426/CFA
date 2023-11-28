@@ -20,12 +20,25 @@ import com.project.util.ConfigUtils;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 사용자 토큰 처리와 관련된 메소드를 제공하는 서비스 클래스입니다.
+ * 
+ * @author Jeon Youngjun, Kim Taewon
+ */
 @RequiredArgsConstructor
 @Service
 public class TokenService {
 	private final TokenRepository tokenRepository;
 	private final ConfigUtils configUtils;
 
+    /**
+     * 지정된 사용자를 위해 새로운 토큰을 저장합니다.
+     * 
+     * @param userId             사용자의 ID.
+     * @param googleLoginResponse 토큰 정보를 포함하는 응답.
+     * @param sessionId          토큰과 관련된 세션 ID.
+     * @author Jeon Youngjun
+     */
 	public void saveToken(Long userId, TokenResponse googleLoginResponse, String sessionId) {
 		// Token 엔터티 생성
 		String refreshToken = googleLoginResponse.getRefreshToken();
@@ -44,6 +57,14 @@ public class TokenService {
 		tokenRepository.save(token);
 	}
 
+	 /**
+     * 지정된 사용자의 리프레시 토큰을 업데이트합니다.
+     * 
+     * @param userId       사용자의 ID.
+     * @param refreshToken 새 리프레시 토큰.
+     * @param sessionId    토큰과 관련된 세션 ID.
+     * @author Jeon Youngjun
+     */
 	@Transactional
 	public void updateRefreshToken(Long userId, String refreshToken, String sessionId) {
 		Instant currentDateTime = Instant.now();
@@ -52,12 +73,26 @@ public class TokenService {
 	    tokenRepository.updateRefreshToken(userId, refreshToken, currentDateTime, expirationTime, sessionId);
 	}
 	
+    /**
+     * 지정된 사용자의 세션 ID를 업데이트합니다.
+     * 
+     * @param userId    사용자의 ID.
+     * @param sessionId 새 세션 ID.
+     * @author Jeon Youngjun
+     */
 	@Transactional
 	public void updateSessionId(Long userId, String sessionId) {
 		Instant currentDateTime = Instant.now();
 		tokenRepository.updateSessionId(userId, currentDateTime, sessionId);
 	}
 	
+    /**
+     * 지정된 세션 ID와 관련된 토큰을 검색합니다.
+     * 
+     * @param sessionId 토큰과 관련된 세션 ID.
+     * @return 지정된 세션 ID의 토큰 또는 찾을 수 없으면 null을 반환합니다.
+     * @author Jeon Youngjun
+     */
 	public Token findBySessionId(String sessionId) {
 		if(sessionId != null) {
 			return tokenRepository.findBySessionId(sessionId);
@@ -67,6 +102,13 @@ public class TokenService {
 		
 	}
 	
+    /**
+     * 리프레시 토큰이 만료되었는지 확인합니다.
+     * 
+     * @param token 확인할 토큰.
+     * @return 리프레시 토큰이 만료되었거나 null인 경우 true, 그렇지 않으면 false를 반환합니다.
+     * @author Jeon Youngjun
+     */
 	public boolean isRefreshTokenExpired(Token token) {
 
 	    if (token != null) {
@@ -81,6 +123,13 @@ public class TokenService {
 	    }
 	}
 	
+    /**
+     * 제공된 리프레시 토큰을 사용하여 액세스 토큰을 갱신합니다.
+     * 
+     * @param refreshToken 새 액세스 토큰을 얻기 위해 사용되는 리프레시 토큰.
+     * @return 새 액세스 토큰 또는 오류 응답을 포함하는 응답 엔터티.
+     * @author Kim Taewon
+     */
 	public ResponseEntity<String> refreshAccessToken(String refreshToken) {
         RestTemplate restTemplate = new RestTemplate();
 
