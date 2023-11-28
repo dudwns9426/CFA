@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
  * 찜목록을 처리하는 컨트롤러 클래스입니다.
  * 사용자의 찜목록에 메뉴를 추가하거나 삭제하는 기능을 제공합니다.
  * 
- * @author Jeon Youngjun)
+ * @author Jeon Youngjun
  */
 @RequiredArgsConstructor
 @RestController
